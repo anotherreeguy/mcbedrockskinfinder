@@ -3,6 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Minecraft Bedrock Skin Finder - Preview and Download Minecraft skins from your Bedrock texture ID.">
+    <meta name="keywords" content="Minecraft, Bedrock, Skin Finder, Skin Preview, Download Skin, Minecraft Skin, Geyser Server">
+    <meta name="author" content="Minecraft Skin Finder">
+    <meta property="og:title" content="Minecraft Bedrock Skin Finder">
+    <meta property="og:description" content="Preview and download Minecraft skins by texture ID. Compatible with Geyser servers.">
+    <meta property="og:image" content="https://example.com/your-image.png">
+    <meta property="og:url" content="https://yourwebsite.com">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Minecraft Skin Finder">
     <title>Minecraft Bedrock Skin Finder</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -50,16 +59,28 @@
             display: none;
             margin-top: 10px;
         }
-        #skinImage {
-            margin-top: 20px;
-            max-width: 200px;
-            max-height: 200px;
-            display: none; /* Hide by default */
-        }
         .warning {
             color: yellow;
             margin-top: 20px;
             font-weight: bold;
+        }
+        /* Embed code box styling */
+        .embed-container {
+            margin-top: 30px;
+            padding: 10px;
+            background-color: #222;
+            border-radius: 5px;
+            border: 1px solid #444;
+        }
+        .embed-container textarea {
+            width: 100%;
+            height: 80px;
+            background-color: #333;
+            color: white;
+            border: 1px solid #444;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -70,23 +91,27 @@
     <input type="text" id="minecraftUsername" placeholder="Enter Minecraft Username" />
     <button onclick="fetchSkin()">Preview Skin</button>
     <p id="errorMessage" class="error"></p>
-    <img id="skinImage" src="" alt="Skin Preview" />
     <button id="downloadBtn" onclick="downloadSkin()">Download Skin</button>
     <p id="warningMessage" class="warning" style="display:none;">In order to use this, you need to join a Geyser server.</p>
+    
+    <!-- Embed code section -->
+    <div class="embed-container">
+        <p>Embed this tool on your website or Discord:</p>
+        <textarea readonly>
+<iframe src="https://yourwebsite.com" width="600" height="400" frameborder="0"></iframe>
+        </textarea>
+    </div>
 </div>
 
 <script>
     async function fetchSkin() {
         const username = document.getElementById("minecraftUsername").value;
         const errorMessage = document.getElementById("errorMessage");
-        const skinImage = document.getElementById("skinImage");
         const downloadBtn = document.getElementById("downloadBtn");
         const warningMessage = document.getElementById("warningMessage");
 
         // Reset errors, images, and previews
         errorMessage.textContent = "";
-        skinImage.src = "";
-        skinImage.style.display = "none"; // Hide image initially
         downloadBtn.style.display = "none"; // Hide download button initially
         warningMessage.style.display = "none"; // Hide warning initially
 
@@ -118,12 +143,7 @@
 
             const textureId = skinData.texture_id;
 
-            // Step 3: Construct the skin texture URL using the texture_id
-            const skinImageUrl = `https://textures.minecraft.net/texture/${textureId}`;
-
-            // Display the skin image and show download button
-            skinImage.src = skinImageUrl;
-            skinImage.style.display = "block"; // Show image
+            // Display download button and warning message
             downloadBtn.style.display = "block"; // Show download button
             warningMessage.style.display = "block"; // Show warning message
 
@@ -134,27 +154,54 @@
     }
 
     function downloadSkin() {
-        const skinImage = document.getElementById("skinImage");
+        const username = document.getElementById("minecraftUsername").value;
 
-        if (!skinImage.src) {
-            alert("No skin preview available!");
+        if (!username) {
+            alert("Please enter a valid Minecraft username!");
             return;
         }
 
-        const textureId = skinImage.src.split('/').pop();  // Extract the texture ID from the URL
-        const link = document.createElement('a');
-        link.href = skinImage.src; // The skin image URL
-        link.download = `${textureId}_reeguy.png`; // Set the download file name to textureId_reeguy.png
-        link.style.display = 'none'; // Hide the link element
+        // Step 2: Fetch the XUID for the given username
+        fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`)
+            .then(response => response.json())
+            .then(xuidData => {
+                if (!xuidData.xuid) {
+                    alert("Could not find XUID for the username!");
+                    return;
+                }
 
-        // Append the link to the body (it must be in the DOM to trigger the click)
-        document.body.appendChild(link);
+                const xuid = xuidData.xuid;
 
-        // Programmatically click the link to trigger the download prompt
-        link.click();
+                // Step 3: Fetch the skin data using the XUID
+                fetch(`https://api.geysermc.org/v2/skin/${xuid}`)
+                    .then(response => response.json())
+                    .then(skinData => {
+                        if (!skinData.texture_id) {
+                            alert("Could not retrieve skin data!");
+                            return;
+                        }
 
-        // After the download is triggered, remove the link element
-        document.body.removeChild(link);
+                        const textureId = skinData.texture_id;
+                        const skinImageUrl = `https://textures.minecraft.net/texture/${textureId}`;
+
+                        // Create the download link
+                        const link = document.createElement('a');
+                        link.href = skinImageUrl; // The skin image URL
+                        link.download = `${textureId}_reeguy.png`; // Set the download file name
+                        link.style.display = 'none'; // Hide the link element
+
+                        // Append the link to the body (it must be in the DOM to trigger the click)
+                        document.body.appendChild(link);
+
+                        // Programmatically click the link to trigger the download prompt
+                        link.click();
+
+                        // After the download is triggered, remove the link element
+                        document.body.removeChild(link);
+                    })
+                    .catch(error => alert("An error occurred while fetching the skin."));
+            })
+            .catch(error => alert("An error occurred while fetching the XUID."));
     }
 </script>
 

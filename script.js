@@ -1,7 +1,6 @@
 let textureUrl = "";
 let skinImageUrl = "";
-let skinTexture = null;
-let scene, camera, renderer, mesh;
+let playerModel;
 
 async function fetchSkin() {
     const username = document.getElementById("username").value;
@@ -46,15 +45,15 @@ async function fetchSkin() {
 
         // Step 3: Generate the skin preview URL
         textureUrl = `https://textures.minecraft.net/texture/${textureId}`;
+        skinImageUrl = textureUrl;
 
         // Set the skin preview image
-        skinImageUrl = textureUrl;
         skinImage.src = skinImageUrl;
 
         // Enable download button
         downloadBtn.style.display = "block";
 
-        // Render the 3D preview of the skin
+        // Create and render the 3D preview model
         create3DPreview(textureUrl);
 
     } catch (error) {
@@ -64,36 +63,33 @@ async function fetchSkin() {
 }
 
 function create3DPreview(textureUrl) {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(200, 300); // Set size of preview
-    document.getElementById("preview3d").appendChild(renderer.domElement);
+    const preview3d = document.getElementById("preview3d");
 
-    const loader = new THREE.TextureLoader();
-    loader.load(textureUrl, function (texture) {
-        skinTexture = texture;
-
-        const geometry = new THREE.BoxGeometry(1, 2, 1); // Body size
-        const material = new THREE.MeshBasicMaterial({ map: skinTexture });
-        mesh = new THREE.Mesh(geometry, material);
-
-        scene.add(mesh);
-        camera.position.z = 3;
-
-        animate();
+    // Create a new Minecraft player model
+    playerModel = new THREE.MinecraftPlayerModel({
+        textureUrl: textureUrl,
+        scale: 0.4
     });
-}
 
-function animate() {
-    requestAnimationFrame(animate);
+    // Create scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(200, 300);
+    preview3d.appendChild(renderer.domElement);
 
-    // Rotate the model for a better view
-    if (mesh) {
-        mesh.rotation.y += 0.01;
+    // Add player model to the scene
+    scene.add(playerModel);
+
+    camera.position.z = 3;
+
+    function animate() {
+        requestAnimationFrame(animate);
+        playerModel.rotation.y += 0.01;
+        renderer.render(scene, camera);
     }
 
-    renderer.render(scene, camera);
+    animate();
 }
 
 function downloadSkin() {

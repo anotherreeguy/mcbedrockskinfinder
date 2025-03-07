@@ -1,6 +1,7 @@
 let textureUrl = "";
 let skinImageUrl = "";
 let playerModel;
+let renderer, scene, camera;
 
 async function fetchSkin() {
     const username = document.getElementById("username").value;
@@ -9,19 +10,19 @@ async function fetchSkin() {
     const preview3d = document.getElementById("preview3d");
     const downloadBtn = document.getElementById("downloadBtn");
 
-    if (!username) {
-        errorMessage.textContent = "Please enter a Minecraft username!";
-        return;
-    }
-
-    // Reset previous error message and skin preview
+    // Reset errors, images, and previews
     errorMessage.textContent = "";
     skinImage.src = "";
     preview3d.innerHTML = "";
     downloadBtn.style.display = "none"; // Hide download button initially
 
+    if (!username) {
+        errorMessage.textContent = "Please enter a Minecraft username!";
+        return;
+    }
+
     try {
-        // Step 1: Get the UUID (user id) from Mojang API using the username
+        // Step 1: Fetch the user's UUID from Mojang's API
         const userResponse = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
         const userData = await userResponse.json();
 
@@ -32,7 +33,7 @@ async function fetchSkin() {
 
         const uuid = userData.id;
 
-        // Step 2: Get the skin texture from Mojang API using the UUID
+        // Step 2: Fetch the skin texture URL from Mojang's API using UUID
         const skinResponse = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
         const skinData = await skinResponse.json();
 
@@ -41,17 +42,16 @@ async function fetchSkin() {
             return;
         }
 
-        // Get the base64-encoded skin texture data
+        // Extract and decode the base64 skin texture
         const base64Texture = skinData.properties[0].value;
         const textureUrl = `https://textures.minecraft.net/texture/${base64Texture}`;
 
+        // Set the skin image and allow download
         skinImageUrl = textureUrl;
         skinImage.src = skinImageUrl;
+        downloadBtn.style.display = "block"; // Show download button
 
-        // Enable download button
-        downloadBtn.style.display = "block";
-
-        // Create and render the 3D preview model
+        // Step 3: Create 3D player model preview using Three.js
         create3DPreview(textureUrl);
 
     } catch (error) {
@@ -63,31 +63,32 @@ async function fetchSkin() {
 function create3DPreview(textureUrl) {
     const preview3d = document.getElementById("preview3d");
 
-    // Create a new Minecraft player model with the texture URL
-    playerModel = new THREE.MinecraftPlayerModel({
-        textureUrl: textureUrl,
-        scale: 0.4
-    });
-
-    // Create scene
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer();
+    // Create scene and camera for 3D view
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    renderer = new THREE.WebGLRenderer();
     renderer.setSize(300, 400);
     preview3d.appendChild(renderer.domElement);
 
-    // Add player model to the scene
+    // Create the player model using the skin texture
+    const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
+    const textureLoader = new THREE.TextureLoader();
+    const texture = textureLoader.load(textureUrl);
+    const playerMaterial = new THREE.MeshBasicMaterial({ map: texture });
+
+    playerModel = new THREE.Mesh(playerGeometry, playerMaterial);
     scene.add(playerModel);
-
-    camera.position.z = 3;
-
-    function animate() {
-        requestAnimationFrame(animate);
-        playerModel.rotation.y += 0.01;
-        renderer.render(scene, camera);
-    }
+    camera.position.z = 2;
 
     animate();
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+    if (playerModel) {
+        playerModel.rotation.y += 0.01; // Rotate the model
+    }
+    renderer.render(scene, camera);
 }
 
 function downloadSkin() {

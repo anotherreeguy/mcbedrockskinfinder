@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Skin Preview</title>
+    <title>Minecraft Bedrock Skin Finder</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -60,8 +60,8 @@
 <body>
 
 <div class="container">
-    <h1>Minecraft Skin Preview</h1>
-    <input type="text" id="username" placeholder="Enter Minecraft Username" />
+    <h1>See Minecraft Bedrock skins.</h1>
+    <input type="text" id="textureId" placeholder="Enter Texture ID" />
     <button onclick="fetchSkin()">Preview Skin</button>
     <p id="errorMessage" class="error"></p>
     <img id="skinImage" src="" alt="Skin Preview" />
@@ -70,7 +70,7 @@
 
 <script>
     async function fetchSkin() {
-        const username = document.getElementById("username").value;
+        const textureId = document.getElementById("textureId").value;
         const errorMessage = document.getElementById("errorMessage");
         const skinImage = document.getElementById("skinImage");
         const downloadBtn = document.getElementById("downloadBtn");
@@ -80,16 +80,16 @@
         skinImage.src = "";
         downloadBtn.style.display = "none"; // Hide download button initially
 
-        if (!username) {
-            errorMessage.textContent = "Please enter a Minecraft username!";
+        if (!textureId) {
+            errorMessage.textContent = "Oops, make sure you've joined a Geyser Minecraft server!";
             return;
         }
 
         try {
-            // Construct the URL to fetch the 2D static skin image
-            const skinImageUrl = `https://mc-heads.net/avatar/${username}`;
+            // Construct the URL to fetch the skin image using the texture ID
+            const skinImageUrl = `https://textures.minecraft.net/texture/${textureId}`;
 
-            // Set the image src
+            // Set the image src to the Minecraft texture URL
             skinImage.src = skinImageUrl;
             downloadBtn.style.display = "block"; // Show download button
 
@@ -100,18 +100,18 @@
     }
 
     function downloadSkin() {
-        const username = document.getElementById("username").value;
+        const textureId = document.getElementById("textureId").value;
         const errorMessage = document.getElementById("errorMessage");
         const skinImage = document.getElementById("skinImage");
 
-        if (!username) {
-            errorMessage.textContent = "Please enter a Minecraft username!";
+        if (!textureId) {
+            errorMessage.textContent = "Please enter a valid Texture ID!";
             return;
         }
 
         const link = document.createElement('a');
         link.href = skinImage.src;
-        link.download = `${username}_skin.png`; // Download the skin as a PNG file
+        link.download = `${textureId}_skin.png`; // Download the skin as a PNG file
         link.click();
     }
 </script>

@@ -21,7 +21,7 @@ async function fetchSkin() {
     downloadBtn.style.display = "none"; // Hide download button initially
 
     try {
-        // Step 1: Get the User ID from the GeyserMC API using the username
+        // Step 1: Get the User ID (xuid) from the GeyserMC API using the username
         const userResponse = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`);
         const userData = await userResponse.json();
 
@@ -30,10 +30,10 @@ async function fetchSkin() {
             return;
         }
 
-        const userId = userData.xuid;
+        const xuid = userData.xuid;
 
-        // Step 2: Get the texture ID from the GeyserMC API
-        const skinResponse = await fetch(`https://api.geysermc.org/v2/skin/${userId}`);
+        // Step 2: Get the skin texture from the GeyserMC API using the xuid
+        const skinResponse = await fetch(`https://api.geysermc.org/v2/skin/${xuid}`);
         const skinData = await skinResponse.json();
 
         if (!skinData || !skinData.textures || !skinData.textures[0]) {
@@ -41,10 +41,8 @@ async function fetchSkin() {
             return;
         }
 
-        const textureId = skinData.textures[0];
-
         // Step 3: Generate the skin preview URL
-        textureUrl = `https://textures.minecraft.net/texture/${textureId}`;
+        textureUrl = `https://textures.minecraft.net/texture/${skinData.textures[0]}`;
         skinImageUrl = textureUrl;
 
         // Set the skin preview image
@@ -65,7 +63,7 @@ async function fetchSkin() {
 function create3DPreview(textureUrl) {
     const preview3d = document.getElementById("preview3d");
 
-    // Create a new Minecraft player model
+    // Create a new Minecraft player model with the texture URL
     playerModel = new THREE.MinecraftPlayerModel({
         textureUrl: textureUrl,
         scale: 0.4

@@ -22,7 +22,7 @@ async function fetchSkin() {
     }
 
     try {
-        // Step 1: Fetch the user's UUID from Mojang's API
+        // Step 1: Fetch the user's UUID from Mojang's API using their username
         const userResponse = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
         const userData = await userResponse.json();
 
@@ -33,7 +33,7 @@ async function fetchSkin() {
 
         const uuid = userData.id;
 
-        // Step 2: Fetch the skin texture URL from Mojang's API using UUID
+        // Step 2: Fetch the player's skin texture using their UUID
         const skinResponse = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
         const skinData = await skinResponse.json();
 
@@ -63,37 +63,30 @@ async function fetchSkin() {
 function create3DPreview(textureUrl) {
     const preview3d = document.getElementById("preview3d");
 
-    // Create scene and camera for 3D view
+    // Initialize Three.js scene
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+
+    // Create a WebGL renderer and add it to the DOM
     renderer = new THREE.WebGLRenderer();
     renderer.setSize(300, 400);
     preview3d.appendChild(renderer.domElement);
 
-    // Create the player model using the skin texture
-    const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
-    const textureLoader = new THREE.TextureLoader();
-    const texture = textureLoader.load(textureUrl);
-    const playerMaterial = new THREE.MeshBasicMaterial({ map: texture });
+    // Create a cube to display the skin (simplified, for now)
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
 
-    playerModel = new THREE.Mesh(playerGeometry, playerMaterial);
-    scene.add(playerModel);
-    camera.position.z = 2;
+    camera.position.z = 5;
+
+    // Animation loop for rendering
+    function animate() {
+        requestAnimationFrame(animate);
+        cube.rotation.x += 0.01;
+        cube.rotation.y += 0.01;
+        renderer.render(scene, camera);
+    }
 
     animate();
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    if (playerModel) {
-        playerModel.rotation.y += 0.01; // Rotate the model
-    }
-    renderer.render(scene, camera);
-}
-
-function downloadSkin() {
-    const link = document.createElement('a');
-    link.href = skinImageUrl;
-    link.download = 'minecraft_skin.png';
-    link.click();
 }

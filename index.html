@@ -54,13 +54,14 @@
             margin-top: 20px;
             max-width: 200px;
             max-height: 200px;
+            display: none; /* Hide by default */
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>See Minecraft Bedrock skins.</h1>
+    <h1>See Minecraft Bedrock skins</h1>
     <input type="text" id="textureId" placeholder="Enter Texture ID" />
     <button onclick="fetchSkin()">Preview Skin</button>
     <p id="errorMessage" class="error"></p>
@@ -78,10 +79,11 @@
         // Reset errors, images, and previews
         errorMessage.textContent = "";
         skinImage.src = "";
+        skinImage.style.display = "none"; // Hide image initially
         downloadBtn.style.display = "none"; // Hide download button initially
 
         if (!textureId) {
-            errorMessage.textContent = "Oops, make sure you've joined a Geyser Minecraft server!";
+            errorMessage.textContent = "Please enter a valid Texture ID!";
             return;
         }
 
@@ -89,9 +91,17 @@
             // Construct the URL to fetch the skin image using the texture ID
             const skinImageUrl = `https://textures.minecraft.net/texture/${textureId}`;
 
-            // Set the image src to the Minecraft texture URL
-            skinImage.src = skinImageUrl;
-            downloadBtn.style.display = "block"; // Show download button
+            // Check if the image exists by trying to load it
+            const img = new Image();
+            img.onload = () => {
+                skinImage.src = skinImageUrl;
+                skinImage.style.display = "block"; // Show image
+                downloadBtn.style.display = "block"; // Show download button
+            };
+            img.onerror = () => {
+                errorMessage.textContent = "Could not find the skin. Please check the Texture ID!";
+            };
+            img.src = skinImageUrl;
 
         } catch (error) {
             errorMessage.textContent = "An error occurred. Please try again!";
@@ -104,14 +114,17 @@
         const errorMessage = document.getElementById("errorMessage");
         const skinImage = document.getElementById("skinImage");
 
-        if (!textureId) {
-            errorMessage.textContent = "Please enter a valid Texture ID!";
+        if (!textureId || !skinImage.src) {
+            errorMessage.textContent = "Please enter a valid Texture ID and preview the skin!";
             return;
         }
 
+        // Create an anchor element to trigger the download
         const link = document.createElement('a');
         link.href = skinImage.src;
-        link.download = `${textureId}_skin.png`; // Download the skin as a PNG file
+        link.download = `${textureId}_skin.png`; // Set the name of the download file
+
+        // Programmatically trigger the click event to open the file explorer dialog
         link.click();
     }
 </script>

@@ -3,105 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Download Minecraft Bedrock skins easily!">
-    <meta name="keywords" content="Minecraft, Bedrock, Skin Finder, Skin Preview, Download Skin, Minecraft Skin, Minecraft Bedrock, Skin Stealer, Bedrock Stealer, MCSteal, Minecraft Skin Taker, How to Take Someone's Minecraft Skin on Bedrock, Bedrock, MCPE, Java">
+    <meta name="description" content="Download Minecraft Bedrock skins!">
+    <meta name="keywords" content="Minecraft, Bedrock, Skin Finder, Skin Preview, Download Skin, Minecraft Skin, Minecraft Bedrock, Skin Stealer, MCPE, Java">
     <meta name="author" content="Minecraft Skin Finder">
-    
-    <!-- Open Graph Meta Tags for Discord Preview -->
-    <meta property="og:title" content="Minecraft Bedrock Skin Finder">
-    <meta property="og:description" content="Download Minecraft Bedrock skins easily!">
-    <meta property="og:url" content="https://projects.reeguy.com/mcbedrockskinstealer"> <!-- Replace with your actual URL -->
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Minecraft Skin Finder">
-    
-    <!-- Twitter Card Meta Tags -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Minecraft Bedrock Skin Finder">
-    <meta name="twitter:description" content="Download Minecraft Bedrock skins easily!">
-    <meta name="twitter:url" content="https://projects.reeguy.com/mcbedrockskinstealer"> <!-- Replace with your actual URL -->
-    
     <title>Minecraft Bedrock Skin Finder</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Roboto', sans-serif; background: #181818; color: white; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
-        .container { text-align: center; padding: 20px; max-width: 600px; width: 100%; }
-        h1 { margin-bottom: 20px; font-size: 24px; }
-        input, button, select { padding: 12px 20px; font-size: 16px; background-color: #222; border: 1px solid #444; color: white; width: 100%; max-width: 300px; margin: 10px 0; border-radius: 5px; cursor: pointer; }
-        button:hover { background-color: #555; }
-        .error { color: red; margin-top: 10px; font-size: 14px; }
-        #downloadBtn { display: none; margin-top: 10px; }
-        .warning { color: yellow; margin-top: 20px; font-weight: bold; font-size: 14px; }
-        select { background-color: #333; border-radius: 5px; }
-        select:focus { outline: none; border-color: #666; }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #181818;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            max-width: 250px;
+            margin: 10px 0;
+            border: 1px solid #444;
+            background-color: #333;
+            color: white;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .profile-info {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        .profile-info span {
+            font-weight: bold;
+        }
+        .warning {
+            color: yellow;
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .skin-preview {
+            margin-top: 20px;
+        }
+        .skin-preview img {
+            max-width: 200px;
+            border-radius: 10px;
+        }
+        .download-btn {
+            display: none;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1 id="title">See Minecraft Bedrock skins</h1>
+    <h1>Minecraft Bedrock Skin Finder</h1>
     <input type="text" id="minecraftUsername" placeholder="Enter Minecraft Username" />
-    <button onclick="fetchSkin()">Preview Skin</button>
+    <button onclick="fetchSkin()">Find Skin</button>
     <p id="errorMessage" class="error"></p>
-    <button id="downloadBtn" onclick="downloadSkin()">Download Skin</button>
+    <div id="profileInfo" class="profile-info"></div>
+    <div class="skin-preview" id="skinPreview"></div>
+    <button id="downloadBtn" class="download-btn" onclick="downloadSkin()">Download Skin</button>
     <p id="warningMessage" class="warning" style="display:none;">In order to use this, you need to join a Geyser server.</p>
 </div>
 
 <script>
-const translations = {
-    en: { title: "See Minecraft Bedrock skins", errorMessage: "Please enter a valid Minecraft username!", downloadButton: "Download Skin", warningMessage: "In order to use this, you need to join a Geyser server." }
-};
+    const elements = {
+        errorMessage: document.getElementById("errorMessage"),
+        profileInfo: document.getElementById("profileInfo"),
+        skinPreview: document.getElementById("skinPreview"),
+        downloadBtn: document.getElementById("downloadBtn"),
+        warningMessage: document.getElementById("warningMessage")
+    };
 
-const elements = { title: document.getElementById("title"), errorMessage: document.getElementById("errorMessage"), downloadBtn: document.getElementById("downloadBtn"), warningMessage: document.getElementById("warningMessage") };
-
-async function detectCountryAndSetLanguage() {
-    try {
-        const res = await fetch("http://ip-api.com/json");
-        const { country } = await res.json();
-        setLanguage("en");
-    } catch { setLanguage("en"); }
-}
-
-function setLanguage(lang) {
-    Object.keys(translations[lang]).forEach(key => elements[key].textContent = translations[lang][key]);
-}
-
-async function fetchSkin() {
-    const username = document.getElementById("minecraftUsername").value;
-    if (!username) return elements.errorMessage.textContent = translations[document.documentElement.lang].errorMessage;
-    
-    try {
-        const { xuid } = await (await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`)).json();
-        if (!xuid) return elements.errorMessage.textContent = "Could not find XUID for the username!";
+    async function fetchSkin() {
+        const username = document.getElementById("minecraftUsername").value;
+        if (!username) return elements.errorMessage.textContent = "Please enter a valid Minecraft username!";
         
-        const { texture_id } = await (await fetch(`https://api.geysermc.org/v2/skin/${xuid}`)).json();
-        if (!texture_id) return elements.errorMessage.textContent = "Could not retrieve skin data!";
-        
-        elements.downloadBtn.style.display = "block";
-        elements.warningMessage.style.display = "block";
-    } catch { elements.errorMessage.textContent = "An error occurred. Please try again!"; }
-}
+        try {
+            const { xuid } = await (await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`)).json();
+            if (!xuid) return elements.errorMessage.textContent = "Could not find XUID for the username!";
+            
+            const { texture_id } = await (await fetch(`https://api.geysermc.org/v2/skin/${xuid}`)).json();
+            if (!texture_id) return elements.errorMessage.textContent = "Could not retrieve skin data!";
 
-async function downloadSkin() {
-    const username = document.getElementById("minecraftUsername").value;
-    if (!username) return alert("Please enter a valid Minecraft username!");
+            const skinImageUrl = `https://textures.minecraft.net/texture/${texture_id}`;
 
-    try {
-        const { xuid } = await (await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`)).json();
-        if (!xuid) return alert("Could not find XUID for the username!");
+            // Display Profile Info
+            elements.profileInfo.innerHTML = `
+                <p><span>XUID:</span> ${xuid}</p>
+                <p><span>Username:</span> ${username}</p>
+            `;
+            
+            // Display Skin Preview
+            elements.skinPreview.innerHTML = `<img src="${skinImageUrl}" alt="Skin Preview" />`;
+            
+            // Show download button
+            elements.downloadBtn.style.display = "block";
 
-        const { texture_id } = await (await fetch(`https://api.geysermc.org/v2/skin/${xuid}`)).json();
-        if (!texture_id) return alert("Could not retrieve skin data!");
+            // Show warning message
+            elements.warningMessage.style.display = "block";
 
-        const link = document.createElement('a');
-        link.href = `https://textures.minecraft.net/texture/${texture_id}`;
-        link.download = `${texture_id}_skin.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    } catch { alert("An error occurred while fetching the skin."); }
-}
+        } catch {
+            elements.errorMessage.textContent = "An error occurred. Please try again!";
+        }
+    }
 
-detectCountryAndSetLanguage();
+    async function downloadSkin() {
+        const username = document.getElementById("minecraftUsername").value;
+        if (!username) return alert("Please enter a valid Minecraft username!");
+
+        try {
+            const { xuid } = await (await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`)).json();
+            if (!xuid) return alert("Could not find XUID for the username!");
+
+            const { texture_id } = await (await fetch(`https://api.geysermc.org/v2/skin/${xuid}`)).json();
+            if (!texture_id) return alert("Could not retrieve skin data!");
+
+            const link = document.createElement('a');
+            link.href = `https://textures.minecraft.net/texture/${texture_id}`;
+            link.download = `${username}_skin.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } catch {
+            alert("An error occurred while fetching the skin.");
+        }
+    }
 </script>
 
 </body>

@@ -1,22 +1,22 @@
-/* Global styles */
+/* Global Styles */
 body {
-    font-family: 'Futura PT', sans-serif; /* Use Futura PT or fallback */
+    font-family: 'Open Sans', sans-serif; /* Use Open Sans font from FontSquirrel */
     background-color: #181818; /* Dark background */
-    color: #f4f4f4; /* Light text */
+    color: #e0e0e0; /* Light text */
     margin: 0;
     padding: 0;
     text-align: center;
 }
 
-/* Container styling */
+/* Main container */
 .container {
     width: 80%;
     max-width: 900px;
     margin: 50px auto;
     padding: 20px;
-    background-color: #1f1f1f;
+    background-color: #222;
     border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
 }
 
 /* Header */
@@ -26,7 +26,7 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* Input & Button */
+/* Input and Button */
 .input-container {
     margin-bottom: 20px;
 }
@@ -40,6 +40,7 @@ input {
     background-color: #333;
     color: #f4f4f4;
     margin-right: 10px;
+    transition: border-color 0.3s ease;
 }
 
 input:focus {
@@ -82,13 +83,13 @@ button:hover {
     height: 400px;
     background-color: #333;
     border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 img {
     max-width: 200px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 /* Download Button */

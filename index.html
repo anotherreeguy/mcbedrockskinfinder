@@ -88,6 +88,12 @@
 </div>
 
 <script>
+    window.onload = function() {
+        // Display the warning at the bottom of the page when the page loads
+        const warningMessage = document.getElementById("warningMessage");
+        warningMessage.style.display = "block"; // Show warning message
+    };
+
     async function fetchSkin() {
         const username = document.getElementById("minecraftUsername").value;
         const errorMessage = document.getElementById("errorMessage");
@@ -127,9 +133,8 @@
 
             const textureId = skinData.texture_id;
 
-            // Display download button and warning message
+            // Display download button
             downloadBtn.style.display = "block"; // Show download button
-            warningMessage.style.display = "block"; // Show warning message
 
         } catch (error) {
             errorMessage.textContent = "An error occurred. Please try again!";
@@ -171,7 +176,7 @@
                         // Create the download link
                         const link = document.createElement('a');
                         link.href = skinImageUrl; // The skin image URL
-                        link.download = `${textureId}_reeguy.png`; // Set the download file name
+                        link.download = `${textureId}_skin.png`; // Set the download file name
                         link.style.display = 'none'; // Hide the link element
 
                         // Append the link to the body (it must be in the DOM to trigger the click)

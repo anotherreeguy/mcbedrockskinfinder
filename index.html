@@ -9,15 +9,13 @@
     <title>Minecraft Bedrock Skin Finder</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Roboto', sans-serif; background-color: #181818; color: white; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
+        body { font-family: 'Roboto', sans-serif; background: #181818; color: white; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; }
         .container { text-align: center; padding: 20px; }
-        input { padding: 10px; font-size: 16px; width: 250px; margin: 10px 0; border: 1px solid #444; background-color: #222; color: white; }
-        button { padding: 10px 20px; font-size: 16px; background-color: #444; color: white; border: none; cursor: pointer; }
+        input, button, select { padding: 10px; font-size: 16px; background-color: #222; border: 1px solid #444; color: white; cursor: pointer; }
         button:hover { background-color: #555; }
         .error { color: red; margin-top: 10px; }
         #downloadBtn { display: none; margin-top: 10px; }
         .warning { color: yellow; margin-top: 20px; font-weight: bold; }
-        .language-select { margin-top: 20px; background-color: #444; color: white; padding: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -29,7 +27,7 @@
     <p id="errorMessage" class="error"></p>
     <button id="downloadBtn" onclick="downloadSkin()">Download Skin</button>
     <p id="warningMessage" class="warning" style="display:none;">In order to use this, you need to join a Geyser server.</p>
-    <select id="languageSelect" class="language-select" onchange="changeLanguage()">
+    <select id="languageSelect" onchange="changeLanguage()">
         <option value="en">English</option>
         <option value="es">Español</option>
         <option value="fr">Français</option>
@@ -40,7 +38,7 @@
 </div>
 
 <script>
-const translations = {
+const translations = { 
     en: { title: "See Minecraft Bedrock skins", errorMessage: "Please enter a valid Minecraft username!", downloadButton: "Download Skin", warningMessage: "In order to use this, you need to join a Geyser server." },
     es: { title: "Ver las pieles de Minecraft Bedrock", errorMessage: "¡Por favor ingresa un nombre de usuario válido de Minecraft!", downloadButton: "Descargar piel", warningMessage: "Para usar esto, necesitas unirte a un servidor Geyser." },
     fr: { title: "Voir les skins Minecraft Bedrock", errorMessage: "Veuillez entrer un nom d'utilisateur Minecraft valide!", downloadButton: "Télécharger la peau", warningMessage: "Pour utiliser cela, vous devez rejoindre un serveur Geyser." },
@@ -49,94 +47,56 @@ const translations = {
     ru: { title: "Просмотр скинов Minecraft Bedrock", errorMessage: "Пожалуйста, введите действительное имя пользователя Minecraft!", downloadButton: "Скачать скин", warningMessage: "Для использования этого необходимо присоединиться к серверу Geyser." }
 };
 
-const title = document.getElementById("title");
-const errorMessage = document.getElementById("errorMessage");
-const downloadBtn = document.getElementById("downloadBtn");
-const warningMessage = document.getElementById("warningMessage");
+const elements = { title: document.getElementById("title"), errorMessage: document.getElementById("errorMessage"), downloadBtn: document.getElementById("downloadBtn"), warningMessage: document.getElementById("warningMessage") };
 
 async function detectCountryAndSetLanguage() {
     try {
-        const res = await fetch("https://ipinfo.io/json?token=YOUR_IPINFO_API_KEY");
-        const data = await res.json();
-        const country = data.country;
-        const languageMap = {
-            ES: "es", FR: "fr", DE: "de", PT: "pt", RU: "ru"
-        };
-        setLanguage(languageMap[country] || "en");
-    } catch (error) {
-        setLanguage("en");
-    }
+        const res = await fetch("http://ip-api.com/json");
+        const { country } = await res.json();
+        setLanguage({ ES: "es", FR: "fr", DE: "de", PT: "pt", RU: "ru" }[country] || "en");
+    } catch { setLanguage("en"); }
 }
 
-function setLanguage(language) {
-    title.innerText = translations[language].title;
-    errorMessage.innerText = translations[language].errorMessage;
-    downloadBtn.innerText = translations[language].downloadButton;
-    warningMessage.innerText = translations[language].warningMessage;
+function setLanguage(lang) {
+    Object.keys(translations[lang]).forEach(key => elements[key].textContent = translations[lang][key]);
 }
 
-function changeLanguage() {
-    setLanguage(document.getElementById("languageSelect").value);
-}
+function changeLanguage() { setLanguage(document.getElementById("languageSelect").value); }
 
 async function fetchSkin() {
     const username = document.getElementById("minecraftUsername").value;
-    if (!username) {
-        errorMessage.textContent = translations[document.getElementById("languageSelect").value].errorMessage;
-        return;
-    }
-
+    if (!username) return elements.errorMessage.textContent = translations[document.getElementById("languageSelect").value].errorMessage;
+    
     try {
-        const xuidRes = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`);
-        const xuidData = await xuidRes.json();
-        if (!xuidData.xuid) {
-            errorMessage.textContent = "Could not find XUID for the username!";
-            return;
-        }
-        const skinRes = await fetch(`https://api.geysermc.org/v2/skin/${xuidData.xuid}`);
-        const skinData = await skinRes.json();
-        if (!skinData.texture_id) {
-            errorMessage.textContent = "Could not retrieve skin data!";
-            return;
-        }
-        downloadBtn.style.display = "block";
-        warningMessage.style.display = "block";
-    } catch (error) {
-        errorMessage.textContent = "An error occurred. Please try again!";
-    }
+        const { xuid } = await (await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`)).json();
+        if (!xuid) return elements.errorMessage.textContent = "Could not find XUID for the username!";
+        
+        const { texture_id } = await (await fetch(`https://api.geysermc.org/v2/skin/${xuid}`)).json();
+        if (!texture_id) return elements.errorMessage.textContent = "Could not retrieve skin data!";
+        
+        elements.downloadBtn.style.display = "block";
+        elements.warningMessage.style.display = "block";
+    } catch { elements.errorMessage.textContent = "An error occurred. Please try again!"; }
 }
 
 async function downloadSkin() {
     const username = document.getElementById("minecraftUsername").value;
-    if (!username) {
-        alert("Please enter a valid Minecraft username!");
-        return;
-    }
+    if (!username) return alert("Please enter a valid Minecraft username!");
 
     try {
-        const xuidRes = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`);
-        const xuidData = await xuidRes.json();
-        if (!xuidData.xuid) {
-            alert("Could not find XUID for the username!");
-            return;
-        }
-        const skinRes = await fetch(`https://api.geysermc.org/v2/skin/${xuidData.xuid}`);
-        const skinData = await skinRes.json();
-        if (!skinData.texture_id) {
-            alert("Could not retrieve skin data!");
-            return;
-        }
-        const skinImageUrl = `https://textures.minecraft.net/texture/${skinData.texture_id}`;
+        const { xuid } = await (await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`)).json();
+        if (!xuid) return alert("Could not find XUID for the username!");
+
+        const { texture_id } = await (await fetch(`https://api.geysermc.org/v2/skin/${xuid}`)).json();
+        if (!texture_id) return alert("Could not retrieve skin data!");
+
         const link = document.createElement('a');
-        link.href = skinImageUrl;
-        link.download = `${skinData.texture_id}_skin.png`;
-        link.style.display = 'none';
+        link.href = `https://textures.minecraft.net/texture/${texture_id}`;
+        link.download = `${texture_id}_skin.png`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    } catch (error) {
-        alert("An error occurred while fetching the skin.");
-    }
+    } catch { alert("An error occurred while fetching the skin."); }
 }
 
 detectCountryAndSetLanguage();

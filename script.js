@@ -36,13 +36,13 @@ async function fetchSkin() {
         const skinResponse = await fetch(`https://api.geysermc.org/v2/skin/${xuid}`);
         const skinData = await skinResponse.json();
 
-        if (!skinData || !skinData.textures || !skinData.textures[0]) {
+        if (!skinData || !skinData.texture_id) {
             errorMessage.textContent = "Skin not found for this user!";
             return;
         }
 
         // Step 3: Generate the skin preview URL
-        textureUrl = `https://textures.minecraft.net/texture/${skinData.textures[0]}`;
+        textureUrl = `https://textures.minecraft.net/texture/${skinData.texture_id}`;
         skinImageUrl = textureUrl;
 
         // Set the skin preview image

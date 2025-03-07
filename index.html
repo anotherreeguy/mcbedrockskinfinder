@@ -10,7 +10,7 @@
     <!-- Open Graph Meta Tags for Discord Preview -->
     <meta property="og:title" content="Minecraft Bedrock Skin Finder">
     <meta property="og:description" content="Download Minecraft Bedrock skins easily!">
-    <meta property="og:url" content="https://yourwebsite.com"> <!-- Replace with your actual URL -->
+    <meta property="og:url" content="https://projects.reeguy.com/mcbedrockskinstealer"> <!-- Replace with your actual URL -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Minecraft Skin Finder">
     
@@ -18,7 +18,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Minecraft Bedrock Skin Finder">
     <meta name="twitter:description" content="Download Minecraft Bedrock skins easily!">
-    <meta name="twitter:url" content="https://yourwebsite.com"> <!-- Replace with your actual URL -->
+    <meta name="twitter:url" content="https://projects.reeguy.com/mcbedrockskinstealer"> <!-- Replace with your actual URL -->
     
     <title>Minecraft Bedrock Skin Finder</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
@@ -44,24 +44,11 @@
     <p id="errorMessage" class="error"></p>
     <button id="downloadBtn" onclick="downloadSkin()">Download Skin</button>
     <p id="warningMessage" class="warning" style="display:none;">In order to use this, you need to join a Geyser server.</p>
-    <select id="languageSelect" onchange="changeLanguage()">
-        <option value="en">English</option>
-        <option value="es">Español</option>
-        <option value="fr">Français</option>
-        <option value="de">Deutsch</option>
-        <option value="pt">Português</option>
-        <option value="ru">Русский</option>
-    </select>
 </div>
 
 <script>
 const translations = {
-    en: { title: "See Minecraft Bedrock skins", errorMessage: "Please enter a valid Minecraft username!", downloadButton: "Download Skin", warningMessage: "In order to use this, you need to join a Geyser server." },
-    es: { title: "Ver las pieles de Minecraft Bedrock", errorMessage: "¡Por favor ingresa un nombre de usuario válido de Minecraft!", downloadButton: "Descargar piel", warningMessage: "Para usar esto, necesitas unirte a un servidor Geyser." },
-    fr: { title: "Voir les skins Minecraft Bedrock", errorMessage: "Veuillez entrer un nom d'utilisateur Minecraft valide!", downloadButton: "Télécharger la peau", warningMessage: "Pour utiliser cela, vous devez rejoindre un serveur Geyser." },
-    de: { title: "Minecraft Bedrock Skins anzeigen", errorMessage: "Bitte geben Sie einen gültigen Minecraft-Benutzernamen ein!", downloadButton: "Haut herunterladen", warningMessage: "Um dies zu verwenden, müssen Sie einem Geyser-Server beitreten." },
-    pt: { title: "Ver skins do Minecraft Bedrock", errorMessage: "Por favor, insira um nome de usuário válido do Minecraft!", downloadButton: "Baixar pele", warningMessage: "Para usar isso, você precisa entrar em um servidor Geyser." },
-    ru: { title: "Просмотр скинов Minecraft Bedrock", errorMessage: "Пожалуйста, введите действительное имя пользователя Minecraft!", downloadButton: "Скачать скин", warningMessage: "Для использования этого необходимо присоединиться к серверу Geyser." }
+    en: { title: "See Minecraft Bedrock skins", errorMessage: "Please enter a valid Minecraft username!", downloadButton: "Download Skin", warningMessage: "In order to use this, you need to join a Geyser server." }
 };
 
 const elements = { title: document.getElementById("title"), errorMessage: document.getElementById("errorMessage"), downloadBtn: document.getElementById("downloadBtn"), warningMessage: document.getElementById("warningMessage") };
@@ -70,7 +57,7 @@ async function detectCountryAndSetLanguage() {
     try {
         const res = await fetch("http://ip-api.com/json");
         const { country } = await res.json();
-        setLanguage({ ES: "es", FR: "fr", DE: "de", PT: "pt", RU: "ru" }[country] || "en");
+        setLanguage("en");
     } catch { setLanguage("en"); }
 }
 
@@ -78,11 +65,9 @@ function setLanguage(lang) {
     Object.keys(translations[lang]).forEach(key => elements[key].textContent = translations[lang][key]);
 }
 
-function changeLanguage() { setLanguage(document.getElementById("languageSelect").value); }
-
 async function fetchSkin() {
     const username = document.getElementById("minecraftUsername").value;
-    if (!username) return elements.errorMessage.textContent = translations[document.getElementById("languageSelect").value].errorMessage;
+    if (!username) return elements.errorMessage.textContent = translations[document.documentElement.lang].errorMessage;
     
     try {
         const { xuid } = await (await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`)).json();

@@ -57,8 +57,8 @@
         }
         #preview3d {
             margin-top: 20px;
-            width: 300px;
-            height: 400px;
+            width: 400px;
+            height: 600px;
         }
     </style>
 </head>
@@ -123,7 +123,7 @@
             skinImage.src = textureUrl;
             downloadBtn.style.display = "block"; // Show download button
 
-            // Step 4: Create 3D preview of the skin (this part can be customized further)
+            // Step 4: Create 3D preview of the skin (this part will now use the full player model)
             create3DPreview(textureUrl);
 
         } catch (error) {
@@ -133,29 +133,42 @@
     }
 
     function create3DPreview(textureUrl) {
-        // 3D Preview using Three.js
         const preview3d = document.getElementById("preview3d");
+
+        // Create the scene
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(300, 400);
+        renderer.setSize(400, 600);
         preview3d.appendChild(renderer.domElement);
 
-        // Create 3D model (simplified cube for now)
-        const geometry = new THREE.BoxGeometry(1, 1, 1);
-        const material = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(textureUrl) });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
+        // Create the player model
+        const loader = new THREE.GLTFLoader();
 
-        camera.position.z = 5;
+        // Load the Minecraft character model (you can use an existing Minecraft player model, or download one)
+        loader.load('https://raw.githubusercontent.com/henryj7/minecraft-models/master/models/steve/steve.gltf', function(gltf) {
+            const model = gltf.scene;
+            scene.add(model);
 
-        function animate() {
-            requestAnimationFrame(animate);
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-            renderer.render(scene, camera);
-        }
-        animate();
+            // Apply the skin texture to the model
+            const textureLoader = new THREE.TextureLoader();
+            const skinTexture = textureLoader.load(textureUrl);
+            model.traverse(function(child) {
+                if (child.isMesh) {
+                    child.material.map = skinTexture;
+                }
+            });
+
+            camera.position.z = 3;
+
+            function animate() {
+                requestAnimationFrame(animate);
+                model.rotation.y += 0.01; // Rotate the model
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        });
     }
 
     function downloadSkin() {

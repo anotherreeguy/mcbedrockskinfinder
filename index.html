@@ -19,11 +19,15 @@
             align-items: center;
             height: 100vh;
         }
+
         .container {
             text-align: center;
             padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
         }
-        input, button {
+
+        input, button, select {
             padding: 10px;
             font-size: 16px;
             margin: 10px;
@@ -32,23 +36,57 @@
             border: 1px solid #444;
             color: white;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
+
         button:hover {
             background-color: #555;
         }
+
+        select {
+            background-color: #222;
+            border: 1px solid #444;
+        }
+
         .error {
             color: red;
             margin-top: 10px;
         }
+
         .warning {
             color: yellow;
             margin-top: 20px;
             font-weight: bold;
         }
+
         #skinViewerContainer {
             width: 320px;
             height: 320px;
             margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        #downloadBtn {
+            display: none;
+            margin-top: 10px;
+            padding: 10px 20px;
+        }
+
+        /* Add some responsive design for smaller screens */
+        @media (max-width: 600px) {
+            input, button, select {
+                width: 100%;
+            }
+
+            #skinViewerContainer {
+                width: 250px;
+                height: 250px;
+            }
         }
     </style>
 </head>
@@ -61,7 +99,7 @@
     <p id="errorMessage" class="error"></p>
     <button id="downloadBtn" onclick="downloadSkin()">Download Skin</button>
     <p id="warningMessage" class="warning" style="display:none;">In order to use this, you need to join a Geyser server.</p>
-    
+
     <!-- Container for the 3D skin preview -->
     <div id="skinViewerContainer"></div>
 </div>
@@ -96,11 +134,15 @@
                 return;
             }
 
-            // Set up the 3D model viewer
+            // Set up the 3D model viewer only once
             if (!viewer) {
-                viewer = new SkinViewer("#skinViewerContainer");
+                viewer = new SkinViewer("#skinViewerContainer", {
+                    scale: 2.5,  // Optional: Adjust the size of the model
+                    autoUpdate: true // Optional: Automatically update skin
+                });
             }
 
+            // Update the skin for the viewer
             viewer.setSkin(`https://textures.minecraft.net/texture/${texture_id}`);
             elements.downloadBtn.style.display = "block";
             elements.warningMessage.style.display = "block";

@@ -110,7 +110,7 @@
 
             const textureId = skinData.texture_id;
 
-            // Step 3: Construct the skin texture URL
+            // Step 3: Construct the skin texture URL using the texture_id
             const skinImageUrl = `https://textures.minecraft.net/texture/${textureId}`;
 
             // Display the skin image and show download button
@@ -133,8 +133,8 @@
         }
 
         const link = document.createElement('a');
-        link.href = skinImage.src;
-        link.download = "{textureId}_reeguy.png"; // Default name for the download file
+        link.href = skinImage.src; // This is the correct URL for the skin
+        link.download = "minecraft_skin.png"; // Default name for the download file
         link.click();
     }
 </script>

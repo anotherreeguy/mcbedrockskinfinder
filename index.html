@@ -3,28 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft Skin 3D Preview</title>
-    <!-- Load Open Sans font from FontSquirrel -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fontsource-open-sans@4.3.2/css/open-sans.css">
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <title>Minecraft Skin Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #181818;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+        }
+        input {
+            padding: 10px;
+            font-size: 16px;
+            width: 250px;
+            margin: 10px 0;
+            border: 1px solid #444;
+            background-color: #222;
+            color: white;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #444;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        #downloadBtn {
+            display: none;
+            margin-top: 10px;
+        }
+        #skinImage {
+            margin-top: 20px;
+            max-width: 200px;
+            max-height: 200px;
+        }
+        #preview3d {
+            margin-top: 20px;
+            width: 300px;
+            height: 400px;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Minecraft Skin 3D Previewer</h1>
-        <div class="input-container">
-            <input type="text" id="username" placeholder="Enter Minecraft Username" />
-            <button onclick="fetchSkin()">Preview Skin</button>
-        </div>
-        <div class="skin-preview">
-            <div id="preview3d" class="preview3d"></div>
-            <img id="skinImage" src="" alt="Minecraft Skin" />
-        </div>
-        <div class="download-container">
-            <button id="downloadBtn" onclick="downloadSkin()" style="display: none;">Download Skin</button>
-        </div>
-        <div id="errorMessage" class="error-message"></div>
-    </div>
-    <script src="script.js"></script>
+
+<div class="container">
+    <h1>Minecraft Skin Preview</h1>
+    <input type="text" id="username" placeholder="Enter Minecraft Username" />
+    <button onclick="fetchSkin()">Preview Skin</button>
+    <p id="errorMessage" class="error"></p>
+    <img id="skinImage" src="" alt="Skin Preview" />
+    <button id="downloadBtn" onclick="downloadSkin()">Download Skin</button>
+    <div id="preview3d"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+    async function fetchSkin() {
+        const username = document.getElementById("username").value;
+        const errorMessage = document.getElementById("errorMessage");
+        const skinImage = document.getElementById("skinImage");
+        const preview3d = document.getElementById("preview3d");
+        const downloadBtn = document.getElementById("downloadBtn");
+
+        // Reset errors, images, and previews
+        errorMessage.textContent = "";
+        skinImage.src = "";
+        preview3d.innerHTML = "";
+        downloadBtn.style.display = "none"; // Hide download button initially
+
+        if (!username) {
+            errorMessage.textContent = "Please enter a Minecraft username!";
+            return;
+        }
+
+        try {
+            // Step 1: Fetch the user's XUID (Minecraft user ID) from the API (Using GeyserMC)
+            const xuidResponse = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`);
+            const xuidData = await xuidResponse.json();
+
+            if (!xuidData.xuid) {
+                errorMessage.textContent = "Invalid Minecraft username or user not found!";
+                return;
+            }
+
+            const xuid = xuidData.xuid;
+
+            // Step 2: Fetch the player's profile skin data using the XUID (Using GeyserMC)
+            const skinResponse = await fetch(`https://api.geysermc.org/v2/skin/${xuid}`);
+            const skinData = await skinResponse.json();
+
+            if (!skinData.texture_id) {
+                errorMessage.textContent = "Skin not found for this user!";
+                return;
+            }
+
+            // Step 3: Build the texture URL using the texture ID
+            const textureId = skinData.texture_id;
+            const textureUrl = `https://textures.minecraft.net/texture/${textureId}`;
+
+            // Set the skin image and allow download
+            skinImage.src = textureUrl;
+            downloadBtn.style.display = "block"; // Show download button
+
+            // Step 4: Create 3D preview of the skin (this part can be customized further)
+            create3DPreview(textureUrl);
+
+        } catch (error) {
+            errorMessage.textContent = "An error occurred. Please try again!";
+            console.error("Error fetching skin:", error);
+        }
+    }
+
+    function create3DPreview(textureUrl) {
+        // 3D Preview using Three.js
+        const preview3d = document.getElementById("preview3d");
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(300, 400);
+        preview3d.appendChild(renderer.domElement);
+
+        // Create 3D model (simplified cube for now)
+        const geometry = new THREE.BoxGeometry(1, 1, 1);
+        const material = new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(textureUrl) });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+    }
+
+    function downloadSkin() {
+        const username = document.getElementById("username").value;
+        const errorMessage = document.getElementById("errorMessage");
+        const skinImage = document.getElementById("skinImage");
+
+        if (!username) {
+            errorMessage.textContent = "Please enter a Minecraft username!";
+            return;
+        }
+
+        const link = document.createElement('a');
+        link.href = skinImage.src;
+        link.download = `${username}_skin.png`; // Download the skin as a PNG file
+        link.click();
+    }
+</script>
+
 </body>
 </html>

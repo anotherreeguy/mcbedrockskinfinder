@@ -1,38 +1,75 @@
+/* Global styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Futura PT', sans-serif; /* Use Futura PT or fallback */
+    background-color: #181818; /* Dark background */
+    color: #f4f4f4; /* Light text */
+    margin: 0;
+    padding: 0;
     text-align: center;
-    background-color: #f0f0f0;
 }
 
+/* Container styling */
 .container {
     width: 80%;
-    margin: 0 auto;
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #1f1f1f;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
 }
 
+/* Header */
+h1 {
+    font-size: 2.5em;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+/* Input & Button */
 .input-container {
     margin-bottom: 20px;
 }
 
 input {
-    padding: 10px;
+    padding: 12px;
     font-size: 16px;
-    width: 200px;
-    border-radius: 5px;
+    width: 300px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    background-color: #333;
+    color: #f4f4f4;
+    margin-right: 10px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #1e88e5;
 }
 
 button {
-    padding: 10px 20px;
+    padding: 12px 20px;
     font-size: 16px;
     cursor: pointer;
-    border-radius: 5px;
-    margin-left: 10px;
+    border-radius: 8px;
+    background-color: #1e88e5;
+    border: none;
+    color: #ffffff;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
-    background-color: #5c6bc0;
-    color: white;
+    background-color: #1565c0;
 }
 
+/* Error Message */
+.error-message {
+    color: red;
+    margin-top: 20px;
+    font-size: 16px;
+}
+
+/* Skin Preview Section */
 .skin-preview {
     display: flex;
     justify-content: center;
@@ -43,18 +80,35 @@ button:hover {
 .preview3d {
     width: 300px;
     height: 400px;
+    background-color: #333;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
 }
 
 img {
     max-width: 200px;
-    border-radius: 5px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
+/* Download Button */
 .download-container {
     margin-top: 20px;
 }
 
-.error-message {
-    color: red;
-    margin-top: 20px;
+button#downloadBtn {
+    padding: 12px 20px;
+    background-color: #0f9d58;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+button#downloadBtn:hover {
+    background-color: #0b7b44;
+}
+
+button#downloadBtn:active {
+    background-color: #0a6a3c;
 }

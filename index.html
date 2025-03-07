@@ -4,56 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Download Minecraft Bedrock skins!">
-    <meta name="keywords" content="Minecraft, Bedrock, Skin Finder, Skin Preview, Download Skin, Minecraft Skin, Minecraft Bedrock, Skin Stealer, MCPE, Java">
-    <meta name="author" content="Minecraft Skin Finder">
+    <meta name="keywords" content="Minecraft, Bedrock, Skin Finder, Skin Preview, Download Skin, Minecraft Skin, Skin Stealer, MCPE">
     <title>Minecraft Bedrock Skin Finder</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background: #181818;
+            background-color: #181818;
             color: white;
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            flex-direction: column;
         }
         .container {
             text-align: center;
-            width: 100%;
-            max-width: 600px;
             padding: 20px;
-            background: #222;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
         }
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 20px;
-        }
-        input {
+        input, button {
             padding: 10px;
             font-size: 16px;
-            width: 100%;
-            max-width: 250px;
-            margin: 10px 0;
+            margin: 10px;
+            width: 250px;
+            background-color: #222;
             border: 1px solid #444;
-            background-color: #333;
             color: white;
-            border-radius: 5px;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background-color: #444;
-            color: white;
-            border: none;
-            border-radius: 5px;
             cursor: pointer;
-            margin: 10px 0;
         }
         button:hover {
             background-color: #555;
@@ -62,84 +40,73 @@
             color: red;
             margin-top: 10px;
         }
-        .profile-info {
-            margin-top: 20px;
-            font-size: 16px;
-        }
-        .profile-info span {
-            font-weight: bold;
-        }
         .warning {
             color: yellow;
             margin-top: 20px;
             font-weight: bold;
-            text-align: center;
         }
-        .skin-preview {
+        #skinViewerContainer {
+            width: 320px;
+            height: 320px;
             margin-top: 20px;
-        }
-        .skin-preview img {
-            max-width: 200px;
-            border-radius: 10px;
-        }
-        .download-btn {
-            display: none;
-            margin-top: 10px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Minecraft Bedrock Skin Finder</h1>
+    <h1>See Minecraft Bedrock Skins</h1>
     <input type="text" id="minecraftUsername" placeholder="Enter Minecraft Username" />
-    <button onclick="fetchSkin()">Find Skin</button>
+    <button onclick="fetchSkin()">Preview Skin</button>
     <p id="errorMessage" class="error"></p>
-    <div id="profileInfo" class="profile-info"></div>
-    <div class="skin-preview" id="skinPreview"></div>
-    <button id="downloadBtn" class="download-btn" onclick="downloadSkin()">Download Skin</button>
+    <button id="downloadBtn" onclick="downloadSkin()">Download Skin</button>
     <p id="warningMessage" class="warning" style="display:none;">In order to use this, you need to join a Geyser server.</p>
+    
+    <!-- Container for the 3D skin preview -->
+    <div id="skinViewerContainer"></div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/mc-skin-viewer@1.0.0/dist/skin-viewer.min.js"></script>
 <script>
-    const elements = {
+    const elements = { 
         errorMessage: document.getElementById("errorMessage"),
-        profileInfo: document.getElementById("profileInfo"),
-        skinPreview: document.getElementById("skinPreview"),
         downloadBtn: document.getElementById("downloadBtn"),
-        warningMessage: document.getElementById("warningMessage")
+        warningMessage: document.getElementById("warningMessage"),
+        skinViewerContainer: document.getElementById("skinViewerContainer"),
     };
+    let viewer;
 
     async function fetchSkin() {
         const username = document.getElementById("minecraftUsername").value;
-        if (!username) return elements.errorMessage.textContent = "Please enter a valid Minecraft username!";
-        
+        if (!username) {
+            elements.errorMessage.textContent = "Please enter a valid Minecraft username!";
+            return;
+        }
+
         try {
             const { xuid } = await (await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`)).json();
-            if (!xuid) return elements.errorMessage.textContent = "Could not find XUID for the username!";
-            
+            if (!xuid) {
+                elements.errorMessage.textContent = "Could not find XUID for the username!";
+                return;
+            }
+
             const { texture_id } = await (await fetch(`https://api.geysermc.org/v2/skin/${xuid}`)).json();
-            if (!texture_id) return elements.errorMessage.textContent = "Could not retrieve skin data!";
+            if (!texture_id) {
+                elements.errorMessage.textContent = "Could not retrieve skin data!";
+                return;
+            }
 
-            const skinImageUrl = `https://textures.minecraft.net/texture/${texture_id}`;
+            // Set up the 3D model viewer
+            if (!viewer) {
+                viewer = new SkinViewer("#skinViewerContainer");
+            }
 
-            // Display Profile Info
-            elements.profileInfo.innerHTML = `
-                <p><span>XUID:</span> ${xuid}</p>
-                <p><span>Username:</span> ${username}</p>
-            `;
-            
-            // Display Skin Preview
-            elements.skinPreview.innerHTML = `<img src="${skinImageUrl}" alt="Skin Preview" />`;
-            
-            // Show download button
+            viewer.setSkin(`https://textures.minecraft.net/texture/${texture_id}`);
             elements.downloadBtn.style.display = "block";
-
-            // Show warning message
             elements.warningMessage.style.display = "block";
-
-        } catch {
+        } catch (error) {
             elements.errorMessage.textContent = "An error occurred. Please try again!";
+            console.error(error);
         }
     }
 
@@ -156,12 +123,13 @@
 
             const link = document.createElement('a');
             link.href = `https://textures.minecraft.net/texture/${texture_id}`;
-            link.download = `${username}_skin.png`;
+            link.download = `${texture_id}_skin.png`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        } catch {
+        } catch (error) {
             alert("An error occurred while fetching the skin.");
+            console.error(error);
         }
     }
 </script>

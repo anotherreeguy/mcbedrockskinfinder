@@ -55,11 +55,6 @@
             max-width: 200px;
             max-height: 200px;
         }
-        #preview3d {
-            margin-top: 20px;
-            width: 400px;
-            height: 600px;
-        }
     </style>
 </head>
 <body>
@@ -71,22 +66,18 @@
     <p id="errorMessage" class="error"></p>
     <img id="skinImage" src="" alt="Skin Preview" />
     <button id="downloadBtn" onclick="downloadSkin()">Download Skin</button>
-    <div id="preview3d"></div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
     async function fetchSkin() {
         const username = document.getElementById("username").value;
         const errorMessage = document.getElementById("errorMessage");
         const skinImage = document.getElementById("skinImage");
-        const preview3d = document.getElementById("preview3d");
         const downloadBtn = document.getElementById("downloadBtn");
 
         // Reset errors, images, and previews
         errorMessage.textContent = "";
         skinImage.src = "";
-        preview3d.innerHTML = "";
         downloadBtn.style.display = "none"; // Hide download button initially
 
         if (!username) {
@@ -95,80 +86,17 @@
         }
 
         try {
-            // Step 1: Fetch the user's XUID (Minecraft user ID) from the API (Using GeyserMC)
-            const xuidResponse = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`);
-            const xuidData = await xuidResponse.json();
+            // Construct the URL to fetch the 2D static skin image
+            const skinImageUrl = `https://mc-heads.net/avatar/${username}`;
 
-            if (!xuidData.xuid) {
-                errorMessage.textContent = "Invalid Minecraft username or user not found!";
-                return;
-            }
-
-            const xuid = xuidData.xuid;
-
-            // Step 2: Fetch the player's profile skin data using the XUID (Using GeyserMC)
-            const skinResponse = await fetch(`https://api.geysermc.org/v2/skin/${xuid}`);
-            const skinData = await skinResponse.json();
-
-            if (!skinData.texture_id) {
-                errorMessage.textContent = "Skin not found for this user!";
-                return;
-            }
-
-            // Step 3: Build the texture URL using the texture ID
-            const textureId = skinData.texture_id;
-            const textureUrl = `https://textures.minecraft.net/texture/${textureId}`;
-
-            // Set the skin image and allow download
-            skinImage.src = textureUrl;
+            // Set the image src
+            skinImage.src = skinImageUrl;
             downloadBtn.style.display = "block"; // Show download button
-
-            // Step 4: Create 3D preview of the skin (this part will now use the full player model)
-            create3DPreview(textureUrl);
 
         } catch (error) {
             errorMessage.textContent = "An error occurred. Please try again!";
             console.error("Error fetching skin:", error);
         }
-    }
-
-    function create3DPreview(textureUrl) {
-        const preview3d = document.getElementById("preview3d");
-
-        // Create the scene
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(400, 600);
-        preview3d.appendChild(renderer.domElement);
-
-        // Create the player model
-        const loader = new THREE.GLTFLoader();
-
-        // Load the Minecraft character model (you can use an existing Minecraft player model, or download one)
-        loader.load('https://raw.githubusercontent.com/henryj7/minecraft-models/master/models/steve/steve.gltf', function(gltf) {
-            const model = gltf.scene;
-            scene.add(model);
-
-            // Apply the skin texture to the model
-            const textureLoader = new THREE.TextureLoader();
-            const skinTexture = textureLoader.load(textureUrl);
-            model.traverse(function(child) {
-                if (child.isMesh) {
-                    child.material.map = skinTexture;
-                }
-            });
-
-            camera.position.z = 3;
-
-            function animate() {
-                requestAnimationFrame(animate);
-                model.rotation.y += 0.01; // Rotate the model
-                renderer.render(scene, camera);
-            }
-
-            animate();
-        });
     }
 
     function downloadSkin() {

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Bedrock Skin Previewer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Minecraft Bedrock Skin Previewer</h1>
+        <div class="input-container">
+            <input type="text" id="username" placeholder="Enter Minecraft Username" />
+            <button onclick="fetchSkin()">Preview Skin</button>
+        </div>
+        <div class="skin-preview">
+            <div id="preview3d" class="preview3d"></div>
+            <img id="skinImage" src="" alt="Minecraft Skin" />
+        </div>
+        <div class="download-container">
+            <button id="downloadBtn" onclick="downloadSkin()" style="display: none;">Download Skin</button>
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

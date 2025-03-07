@@ -56,6 +56,11 @@
             max-height: 200px;
             display: none; /* Hide by default */
         }
+        .warning {
+            color: yellow;
+            margin-top: 20px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -67,6 +72,7 @@
     <p id="errorMessage" class="error"></p>
     <img id="skinImage" src="" alt="Skin Preview" />
     <button id="downloadBtn" onclick="downloadSkin()">Download Skin</button>
+    <p id="warningMessage" class="warning" style="display:none;">In order to use this, you need to join a Geyser server.</p>
 </div>
 
 <script>
@@ -75,12 +81,14 @@
         const errorMessage = document.getElementById("errorMessage");
         const skinImage = document.getElementById("skinImage");
         const downloadBtn = document.getElementById("downloadBtn");
+        const warningMessage = document.getElementById("warningMessage");
 
         // Reset errors, images, and previews
         errorMessage.textContent = "";
         skinImage.src = "";
         skinImage.style.display = "none"; // Hide image initially
         downloadBtn.style.display = "none"; // Hide download button initially
+        warningMessage.style.display = "none"; // Hide warning initially
 
         if (!username) {
             errorMessage.textContent = "Please enter a valid Minecraft username!";
@@ -117,6 +125,7 @@
             skinImage.src = skinImageUrl;
             skinImage.style.display = "block"; // Show image
             downloadBtn.style.display = "block"; // Show download button
+            warningMessage.style.display = "block"; // Show warning message
 
         } catch (error) {
             errorMessage.textContent = "An error occurred. Please try again!";
@@ -132,10 +141,20 @@
             return;
         }
 
+        const textureId = skinImage.src.split('/').pop();  // Extract the texture ID from the URL
         const link = document.createElement('a');
-        link.href = skinImage.src; // This is the correct URL for the skin
-        link.download = "minecraft_skin.png"; // Default name for the download file
+        link.href = skinImage.src; // The skin image URL
+        link.download = `${textureId}_reeguy.png`; // Set the download file name to textureId_reeguy.png
+        link.style.display = 'none'; // Hide the link element
+
+        // Append the link to the body (it must be in the DOM to trigger the click)
+        document.body.appendChild(link);
+
+        // Programmatically click the link to trigger the download prompt
         link.click();
+
+        // After the download is triggered, remove the link element
+        document.body.removeChild(link);
     }
 </script>
 

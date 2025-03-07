@@ -43,11 +43,6 @@
             background-color: #555;
         }
 
-        select {
-            background-color: #222;
-            border: 1px solid #444;
-        }
-
         .error {
             color: red;
             margin-top: 10px;
@@ -59,7 +54,7 @@
             font-weight: bold;
         }
 
-        #skinViewerContainer {
+        #avatar-container {
             width: 320px;
             height: 320px;
             margin-top: 20px;
@@ -83,7 +78,7 @@
                 width: 100%;
             }
 
-            #skinViewerContainer {
+            #avatar-container {
                 width: 250px;
                 height: 250px;
             }
@@ -101,21 +96,22 @@
     <p id="warningMessage" class="warning" style="display:none;">In order to use this, you need to join a Geyser server.</p>
 
     <!-- Container for the 3D skin preview -->
-    <div id="skinViewerContainer"></div>
+    <div id="avatar-container"></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/mc-skin-viewer@1.0.0/dist/skin-viewer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mc-avatars@2.0.1/dist/avatars.min.js"></script>
 <script>
     const elements = { 
         errorMessage: document.getElementById("errorMessage"),
         downloadBtn: document.getElementById("downloadBtn"),
         warningMessage: document.getElementById("warningMessage"),
-        skinViewerContainer: document.getElementById("skinViewerContainer"),
+        avatarContainer: document.getElementById("avatar-container"),
     };
-    let viewer;
 
+    // Fetch skin and display 3D preview
     async function fetchSkin() {
-        const username = document.getElementById("minecraftUsername").value;
+        const username = document.getElementById("minecraftUsername").value.trim();
+        
         if (!username) {
             elements.errorMessage.textContent = "Please enter a valid Minecraft username!";
             return;
@@ -134,26 +130,31 @@
                 return;
             }
 
-            // Set up the 3D model viewer only once
-            if (!viewer) {
-                viewer = new SkinViewer("#skinViewerContainer", {
-                    scale: 2.5,  // Optional: Adjust the size of the model
-                    autoUpdate: true // Optional: Automatically update skin
-                });
-            }
+            // Create 3D avatar
+            const avatar = new Avatar({
+                username: username,
+                skinUrl: `https://textures.minecraft.net/texture/${texture_id}`,
+                width: 150,
+                height: 150
+            });
 
-            // Update the skin for the viewer
-            viewer.setSkin(`https://textures.minecraft.net/texture/${texture_id}`);
+            // Clear any existing avatar
+            elements.avatarContainer.innerHTML = '';
+            elements.avatarContainer.appendChild(avatar.container);
+
+            // Show the download button and warning message
             elements.downloadBtn.style.display = "block";
             elements.warningMessage.style.display = "block";
+            elements.errorMessage.textContent = ""; // Clear previous errors
         } catch (error) {
-            elements.errorMessage.textContent = "An error occurred. Please try again!";
             console.error(error);
+            elements.errorMessage.textContent = "An error occurred while fetching the skin. Please try again!";
         }
     }
 
+    // Function to download the skin image
     async function downloadSkin() {
-        const username = document.getElementById("minecraftUsername").value;
+        const username = document.getElementById("minecraftUsername").value.trim();
         if (!username) return alert("Please enter a valid Minecraft username!");
 
         try {
@@ -170,8 +171,8 @@
             link.click();
             document.body.removeChild(link);
         } catch (error) {
-            alert("An error occurred while fetching the skin.");
             console.error(error);
+            alert("An error occurred while downloading the skin.");
         }
     }
 </script>

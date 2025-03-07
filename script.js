@@ -22,36 +22,36 @@ async function fetchSkin() {
     }
 
     try {
-        // Step 1: Fetch the user's UUID from Mojang's API using their username
-        const userResponse = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-        const userData = await userResponse.json();
+        // Step 1: Fetch the user's XUID (Minecraft user ID) from the API
+        const xuidResponse = await fetch(`https://api.geysermc.org/v2/xbox/xuid/${username}`);
+        const xuidData = await xuidResponse.json();
 
-        if (!userData || !userData.id) {
-            errorMessage.textContent = "Invalid username or user not found!";
+        if (!xuidData.xuid) {
+            errorMessage.textContent = "Invalid Minecraft username or user not found!";
             return;
         }
 
-        const uuid = userData.id;
+        const xuid = xuidData.xuid;
 
-        // Step 2: Fetch the player's skin texture using their UUID
-        const skinResponse = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}`);
+        // Step 2: Fetch the player's profile skin data using the XUID
+        const skinResponse = await fetch(`https://api.geysermc.org/v2/skin/${xuid}`);
         const skinData = await skinResponse.json();
 
-        if (!skinData || !skinData.properties || !skinData.properties[0].value) {
+        if (!skinData.texture_id) {
             errorMessage.textContent = "Skin not found for this user!";
             return;
         }
 
-        // Extract and decode the base64 skin texture
-        const base64Texture = skinData.properties[0].value;
-        const textureUrl = `https://textures.minecraft.net/texture/${base64Texture}`;
+        // Step 3: Build the texture URL using the texture ID
+        const textureId = skinData.texture_id;
+        textureUrl = `https://textures.minecraft.net/texture/${textureId}`;
 
         // Set the skin image and allow download
         skinImageUrl = textureUrl;
         skinImage.src = skinImageUrl;
         downloadBtn.style.display = "block"; // Show download button
 
-        // Step 3: Create 3D player model preview using Three.js
+        // Step 4: Create 3D preview of the skin (this part can be customized further)
         create3DPreview(textureUrl);
 
     } catch (error) {
